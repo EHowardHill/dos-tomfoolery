@@ -1,0 +1,153 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define toLoc(x, y) (x % 4) + (y * 4)
+
+int score;
+int max;
+
+int power(int x, int y) {
+    int result;
+
+    result = 1;
+    while (y != 0) {
+        if (y & 1) {
+            result *= x;
+        }
+        x *= x;
+        y >>= 1;
+    }
+    return result;
+}
+
+int root(int n) {
+    int x;
+    int e;
+
+    x = n;
+    e = 1;
+
+    while ((x - n / x) > e) {
+        x = (x + n / x) / 2;
+    }
+    return x;
+}
+
+int d[16] = {
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0,
+    0, 0, 0, 0
+};
+
+void shift(int _x, int _y) {
+    int move;
+    int x;
+    int y;
+    int x_cur;
+    int y_cur;
+    int _old;
+    int _new;
+
+    do {
+        move = 0;
+        for (x = 0; x < 4; x++) {
+            for (y = 0; y < 4; y++) {
+                x_cur = x + _x;
+                y_cur = y + _y;
+                if (x_cur > -1 && x_cur < 4 && y_cur > -1 && y_cur < 4) {
+                    _old = d[toLoc(x,y)];
+                    _new = d[toLoc(x_cur,y_cur)];
+                    if (_old > max) max = _old;
+                    if (_old != 0 && _new == 0) {
+                        d[toLoc(x_cur, y_cur)] = _old;
+                        d[toLoc(x,y)] = 0;
+                        move = 1;
+                    } else if ((_old > 0) && (_old == _new)) {
+                        d[toLoc(x_cur,y_cur)] <<= 1;
+                        d[toLoc(x,y)] = 0;
+                        move = 1;
+                        score += _old;
+                    }
+                }
+            }
+        }
+    } while (move);
+}
+
+int setup() {
+    int seed;
+    printf("\n\nEnter a seed number: ");
+    scanf("%d", &seed);
+    srand(seed);
+    getchar();
+    return 0;
+}
+
+int main() {
+    char i;
+    int prep;
+    int over;
+    int t;
+    int loc;
+    int value;
+    int x;
+    int y;
+
+    score = 0;
+    max = 1;
+
+    setup();
+
+    prep = -1;
+    while(1) {
+        prep *= -1;
+        if (prep) {
+
+            over = 1;
+            for (t = 0; t < 16; t++) {
+                if (d[t] == 0) over = 0;
+            }
+            if (over == 1) {
+                printf("\nGAME OVER\nScore: %i\n\n", score);
+                exit(0);
+            }
+
+            do {
+                loc = rand() % 16;
+            } while (d[loc] != 0);
+            value = power(2, rand() % root(max));
+            d[loc] = value;
+
+            printf("\n-----\nScore: %i\n-----\n", score);
+            for (y = 0; y < 4; y++) {
+                for (x = 0; x < 4; x++) {
+                    value = d[toLoc(x,y)];
+                    if (value == 0) {
+                        printf("   _");
+                    } else {
+                        printf("%4i", value);
+                    }
+                }
+                printf("\n");
+            }
+            printf("\n(W) Up, (A) Left, (S) Down, (D) Right - ");
+            i = getchar();
+            printf("%c <\n", i);
+
+            if (i == 'W') {
+                shift(0, -1);
+            } else if (i == 'A') {
+                shift(-1, 0);
+            } else if (i == 'S') {
+                shift(0, 1);
+            } else if (i == 'D') {
+                shift(1, 0);
+            }
+        } else {
+            getchar();
+        }
+    }
+
+    return 0;
+}

@@ -1,0 +1,19 @@
+#include <stdio.h>
+#include <conio.h>
+#include <graphics.h>
+
+char c;
+
+int main() {
+    int graphdriver = DETECT, graphmode;
+    initgraph(&graphdriver, &graphmode, "");
+
+    circle(150, 150, 150);
+
+    c = getchar();
+    printf("%c", c);
+
+    closegraph();
+
+    return 0;
+}
